@@ -100,9 +100,6 @@ export function LeadModal({ lead, onClose }: LeadModalProps) {
         await createLead({
           ...payload,
           user_id: user?.id,
-          mensagem_enviada: false,
-          followup_1_enviado: false,
-          followup_2_enviado: false,
         })
         toast.success('Lead criado!')
       }

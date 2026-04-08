@@ -46,9 +46,6 @@ export async function processLeadFromGoogleLink(
     score_nivel: nivel,
     mensagem_gerada,
     whatsapp_link,
-    mensagem_enviada: false,
-    followup_1_enviado: false,
-    followup_2_enviado: false,
     user_id: userId,
   }
 
