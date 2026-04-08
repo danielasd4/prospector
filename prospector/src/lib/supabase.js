@@ -85,18 +85,23 @@ export async function getLeadStats() {
 // ─── Configurações ─────────────────────────────────────────────────────────────
 
 export async function getConfig(chave) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
   const { data, error } = await supabase
     .from('configuracoes')
     .select('valor')
     .eq('chave', chave)
+    .eq('user_id', user.id)
     .single()
   if (error) return null
   return data?.valor
 }
 
 export async function setConfig(chave, valor) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autenticado')
   const { error } = await supabase
     .from('configuracoes')
-    .upsert({ chave, valor }, { onConflict: 'chave' })
+    .upsert({ chave, valor, user_id: user.id }, { onConflict: 'chave' })
   if (error) throw error
 }

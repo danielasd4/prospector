@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { extractFromGoogleMapsLink, extractFromImage, SEGMENTOS_LIST } from '../lib/extractInfo'
-import { createLead, getConfig } from '../lib/supabase'
+import { createLead, getConfig, supabase } from '../lib/supabase'
 import { openWhatsApp, DEFAULT_MESSAGE } from '../lib/whatsapp'
 import QuickActions from '../components/QuickActions'
 
@@ -95,7 +95,8 @@ export default function AddLead() {
     setSaving(true)
     try {
       const { confianca, ...formData } = form
-      const lead = await createLead({ ...formData, status: 'novo' })
+      const { data: { user } } = await supabase.auth.getUser()
+      const lead = await createLead({ ...formData, status: 'novo', user_id: user.id })
       setSavedLead(lead)
       setStep(STEP_SAVED)
       toast.success('Lead salvo com sucesso!')
