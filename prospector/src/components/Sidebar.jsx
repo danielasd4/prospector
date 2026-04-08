@@ -5,7 +5,9 @@ import {
   UserPlus,
   Settings,
   Zap,
+  LogOut,
 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -51,8 +53,15 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-800">
+        <div className="p-4 border-t border-zinc-800 flex items-center justify-between">
           <p className="text-xs text-zinc-600 font-mono">v1.0.0</p>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="text-zinc-600 hover:text-zinc-300 transition-colors"
+            title="Sair"
+          >
+            <LogOut size={14} />
+          </button>
         </div>
       </aside>
 
