@@ -13,30 +13,30 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 z-30">
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-gray-100">
-          <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center">
+      <aside className="hidden md:flex flex-col w-56 bg-zinc-950 border-r border-zinc-800 min-h-screen fixed left-0 top-0 z-30">
+        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-zinc-800">
+          <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/30">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-gray-900 text-sm">Prospector</span>
+          <span className="font-bold text-zinc-100 text-sm tracking-wide">Prospector</span>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-0.5">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-brand-50 text-brand-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-brand-500/15 text-brand-400 border border-brand-500/20'
+                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-brand-500' : 'text-gray-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-brand-400' : 'text-zinc-600'}`} />
                   {label}
                 </>
               )}
@@ -46,7 +46,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 flex">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-zinc-950 border-t border-zinc-800 flex">
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -54,13 +54,13 @@ export default function Sidebar() {
             end={to === '/'}
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-brand-600' : 'text-gray-400'
+                isActive ? 'text-brand-400' : 'text-zinc-600'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-500' : 'text-gray-400'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-400' : 'text-zinc-600'}`} />
                 {label}
               </>
             )}

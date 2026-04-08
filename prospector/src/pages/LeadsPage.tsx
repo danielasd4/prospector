@@ -19,6 +19,8 @@ const STATUS_FILTER_OPTIONS = [
   { value: 'nao_interessado', label: 'Não interessado' },
 ]
 
+const selectClass = "bg-zinc-900 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-500 transition-colors"
+
 export default function LeadsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editLead, setEditLead] = useState<Lead | null>(null)
@@ -32,15 +34,8 @@ export default function LeadsPage() {
     segmento: segmento !== 'todos' ? segmento : undefined,
   })
 
-  function openEdit(lead: Lead) {
-    setEditLead(lead)
-    setModalOpen(true)
-  }
-
-  function openNew() {
-    setEditLead(null)
-    setModalOpen(true)
-  }
+  function openEdit(lead: Lead) { setEditLead(lead); setModalOpen(true) }
+  function openNew() { setEditLead(null); setModalOpen(true) }
 
   return (
     <div className="space-y-4">
@@ -48,56 +43,32 @@ export default function LeadsPage() {
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        <div className="flex-1 min-w-48 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
-          <Search className="w-4 h-4 text-gray-400" />
+        <div className="flex-1 min-w-48 flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 focus-within:border-brand-500 transition-colors">
+          <Search className="w-4 h-4 text-zinc-600 shrink-0" />
           <input
             value={busca}
             onChange={e => setBusca(e.target.value)}
             placeholder="Buscar por nome..."
-            className="flex-1 text-sm outline-none bg-transparent"
+            className="flex-1 text-sm outline-none bg-transparent text-zinc-200 placeholder-zinc-600"
           />
         </div>
-        <select
-          value={status}
-          onChange={e => setStatus(e.target.value)}
-          className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm shadow-sm outline-none"
-        >
-          {STATUS_FILTER_OPTIONS.map(o => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
+        <select value={status} onChange={e => setStatus(e.target.value)} className={selectClass}>
+          {STATUS_FILTER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-        <select
-          value={segmento}
-          onChange={e => setSegmento(e.target.value)}
-          className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm shadow-sm outline-none"
-        >
+        <select value={segmento} onChange={e => setSegmento(e.target.value)} className={selectClass}>
           <option value="todos">Todos os segmentos</option>
-          {SEGMENTOS.map(s => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
+          {SEGMENTOS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
-      {/* Count */}
       {!isLoading && (
-        <p className="text-xs text-gray-400">
-          {leads.length} lead{leads.length !== 1 ? 's' : ''}
-        </p>
+        <p className="text-xs text-zinc-600">{leads.length} lead{leads.length !== 1 ? 's' : ''}</p>
       )}
 
-      {/* List */}
       {isLoading ? (
         <LoadingState />
       ) : leads.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="Nenhum lead encontrado"
-          description="Cole um link do Google Maps acima para adicionar seu primeiro lead."
-        />
+        <EmptyState icon={Users} title="Nenhum lead encontrado" description="Cole um link do Google Maps acima para adicionar seu primeiro lead." />
       ) : (
         <div className="grid gap-3">
           {leads.map((lead: Lead) => (
@@ -107,13 +78,7 @@ export default function LeadsPage() {
       )}
 
       {modalOpen && (
-        <LeadModal
-          lead={editLead}
-          onClose={() => {
-            setModalOpen(false)
-            setEditLead(null)
-          }}
-        />
+        <LeadModal lead={editLead} onClose={() => { setModalOpen(false); setEditLead(null) }} />
       )}
     </div>
   )
