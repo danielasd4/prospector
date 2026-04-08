@@ -7,6 +7,7 @@ import Leads from './pages/Leads'
 import AddLead from './pages/AddLead'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 
 const toastConfig = {
   style: {
@@ -32,6 +33,7 @@ function AppRoutes() {
     )
   }
 
+  if (window.location.pathname === '/reset-password') return <ResetPassword />
   if (!user) return <Login />
 
   return (
