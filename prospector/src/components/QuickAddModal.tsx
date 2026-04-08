@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, MessageCircle, Loader2 } from 'lucide-react'
+import { X, MessageCircle, Loader2, ImagePlus, Sparkles } from 'lucide-react'
 import { SEGMENTOS, inferSegment } from '../utils/segment'
 import { generateDiagnostico } from '../services/leadDiagnostics'
 import { calculateLeadScore } from '../services/leadScoring'
 import { generateMessage } from '../services/leadMessaging'
 import { buildWhatsAppLink } from '../utils/whatsapp'
+import { extractLeadFromImage, imageFileToBase64 } from '../services/extractFromImage'
 import { createLead } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import { useQueryClient } from '@tanstack/react-query'
@@ -13,14 +14,18 @@ import toast from 'react-hot-toast'
 
 interface QuickAddModalProps {
   googleLink: string
+  prefill?: Record<string, string> | null
   onClose: () => void
   onSaved: () => void
 }
 
-export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalProps) {
+export function QuickAddModal({ googleLink, prefill, onClose, onSaved }: QuickAddModalProps) {
   const qc = useQueryClient()
   const nomeRef = useRef<HTMLInputElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
+  const [extracting, setExtracting] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
   const [form, setForm] = useState({
     nome: '',
     telefone: '',
@@ -30,8 +35,21 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
     site: '',
   })
 
-  // Try to extract name from Google Maps URL
   useEffect(() => {
+    // If prefill data from image extraction, use it directly
+    if (prefill && Object.keys(prefill).length > 0) {
+      setForm(f => ({
+        nome: prefill.nome || f.nome,
+        telefone: prefill.telefone || f.telefone,
+        segmento: prefill.segmento || inferSegment(prefill.nome || '', prefill.categoria || '') || f.segmento,
+        cidade: prefill.cidade || f.cidade,
+        instagram: prefill.instagram || f.instagram,
+        site: prefill.site || f.site,
+      }))
+      setTimeout(() => nomeRef.current?.focus(), 100)
+      return
+    }
+    // Otherwise try to extract from URL
     try {
       const url = new URL(googleLink)
       const pathParts = url.pathname.split('/')
@@ -44,19 +62,49 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
         }
       }
     } catch {}
-    // Focus nome field
     setTimeout(() => nomeRef.current?.focus(), 100)
-  }, [googleLink])
+  }, [googleLink, prefill])
 
   function set(field: string, value: string) {
     setForm(f => {
       const updated = { ...f, [field]: value }
-      // Auto-suggest segment when name changes
-      if (field === 'nome') {
-        updated.segmento = inferSegment(value, '') || 'Outro'
-      }
+      if (field === 'nome') updated.segmento = inferSegment(value, '') || 'Outro'
       return updated
     })
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Show preview
+    const objectUrl = URL.createObjectURL(file)
+    setPreview(objectUrl)
+
+    setExtracting(true)
+    toast.loading('Analisando imagem com IA...', { id: 'extract' })
+    try {
+      const base64 = await imageFileToBase64(file)
+      const extracted = await extractLeadFromImage(base64)
+
+      setForm(f => ({
+        nome: extracted.nome || f.nome,
+        telefone: extracted.telefone || f.telefone,
+        segmento: extracted.segmento || inferSegment(extracted.nome || f.nome, extracted.categoria || '') || f.segmento,
+        cidade: extracted.cidade || f.cidade,
+        instagram: extracted.instagram || f.instagram,
+        site: extracted.site || f.site,
+      }))
+
+      const filled = Object.values(extracted).filter(Boolean).length
+      toast.success(`${filled} campo${filled !== 1 ? 's' : ''} preenchido${filled !== 1 ? 's' : ''} automaticamente`, { id: 'extract' })
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao analisar imagem', { id: 'extract' })
+    } finally {
+      setExtracting(false)
+      // Reset file input
+      if (fileRef.current) fileRef.current.value = ''
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -117,9 +165,56 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSave} className="p-5 space-y-3">
-          {/* Nome — campo principal */}
+          {/* Upload de print */}
+          <div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={extracting}
+              className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-brand-200 hover:border-brand-400 bg-brand-50 hover:bg-brand-50 text-brand-600 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-60"
+            >
+              {extracting ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Analisando com IA...</>
+              ) : (
+                <><Sparkles className="w-4 h-4" /> Enviar print para preencher automaticamente</>
+              )}
+            </button>
+
+            {/* Preview da imagem */}
+            {preview && (
+              <div className="mt-2 relative">
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-full h-32 object-cover rounded-xl border border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPreview(null)}
+                  className="absolute top-1.5 right-1.5 bg-black/50 text-white rounded-full p-0.5"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Divisor */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-gray-100" />
+            <span className="text-xs text-gray-400">ou preencha manualmente</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+
+          {/* Nome */}
           <div>
             <label className="text-xs font-medium text-gray-600 block mb-1">
               Nome do negócio <span className="text-red-400">*</span>
@@ -134,7 +229,7 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
             />
           </div>
 
-          {/* Telefone + Segmento lado a lado */}
+          {/* Telefone + Segmento */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-gray-600 block mb-1">Telefone / WhatsApp</label>
@@ -158,7 +253,7 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
             </div>
           </div>
 
-          {/* Cidade + Instagram lado a lado */}
+          {/* Cidade + Instagram */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-gray-600 block mb-1">Cidade</label>
@@ -185,7 +280,7 @@ export function QuickAddModal({ googleLink, onClose, onSaved }: QuickAddModalPro
           {/* Botão salvar */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || extracting}
             className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 mt-1"
           >
             {loading
