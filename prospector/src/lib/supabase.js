@@ -15,9 +15,13 @@ export const supabase = createClient(
 // ─── Leads ────────────────────────────────────────────────────────────────────
 
 export async function getLeads(filters = {}) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   let query = supabase
     .from('leads')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   if (filters.status && filters.status !== 'todos') {
@@ -46,10 +50,12 @@ export async function createLead(lead) {
 }
 
 export async function updateLead(id, updates) {
+  const { data: { user } } = await supabase.auth.getUser()
   const { data, error } = await supabase
     .from('leads')
     .update(updates)
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single()
   if (error) throw error
@@ -57,12 +63,16 @@ export async function updateLead(id, updates) {
 }
 
 export async function deleteLead(id) {
-  const { error } = await supabase.from('leads').delete().eq('id', id)
+  const { data: { user } } = await supabase.auth.getUser()
+  const { error } = await supabase.from('leads').delete().eq('id', id).eq('user_id', user.id)
   if (error) throw error
 }
 
 export async function getLeadStats() {
-  const { data, error } = await supabase.from('leads').select('status')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { total: 0, novo: 0, contatado: 0, respondeu: 0, sem_resposta: 0, fechado: 0, nao_interessado: 0 }
+
+  const { data, error } = await supabase.from('leads').select('status').eq('user_id', user.id)
   if (error) throw error
 
   const stats = {
