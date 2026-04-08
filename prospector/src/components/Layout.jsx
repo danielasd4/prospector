@@ -1,11 +1,12 @@
+import React from 'react'
 import Sidebar from './Sidebar'
 
 export default function Layout({ children }) {
   return (
-    <div className="flex min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="flex-1 min-w-0 overflow-auto pb-20 md:pb-0">
-        {children}
+      <main className="md:ml-56 pb-20 md:pb-0">
+        <div className="max-w-5xl mx-auto px-4 py-6">{children}</div>
       </main>
     </div>
   )

@@ -1,37 +1,36 @@
+import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import Layout from './components/Layout'
-import Dashboard from './pages/Dashboard'
-import Leads from './pages/Leads'
-import AddLead from './pages/AddLead'
-import Settings from './pages/Settings'
 import Login from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
+import Layout from './components/Layout'
+import DashboardPage from './pages/DashboardPage'
+import LeadsPage from './pages/LeadsPage'
+import LeadDetailPage from './pages/LeadDetailPage'
+import TemplatesPage from './pages/TemplatesPage'
+import SettingsPage from './pages/SettingsPage'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 30_000, retry: 1 },
+  },
+})
 
 const toastConfig = {
-  style: {
-    background: '#18181b',
-    color: '#e4e4e7',
-    border: '1px solid #3f3f46',
-    borderRadius: '10px',
-    fontSize: '13px',
-    fontFamily: 'DM Sans, sans-serif',
-  },
-  success: { iconTheme: { primary: '#3b82f6', secondary: '#0d0d10' } },
-  error:   { iconTheme: { primary: '#ef4444', secondary: '#0d0d10' } },
+  style: { borderRadius: '12px', fontSize: '13px' },
 }
 
 function AppRoutes() {
   const { user, loading } = useAuth()
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-brand-400 border-t-transparent rounded-full animate-spin" />
       </div>
     )
-  }
 
   if (window.location.pathname === '/reset-password') return <ResetPassword />
   if (!user) return <Login />
@@ -39,11 +38,12 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        <Route path="/"         element={<Dashboard />} />
-        <Route path="/leads"    element={<Leads />} />
-        <Route path="/add"      element={<AddLead />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="*"         element={<Navigate to="/" replace />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/leads" element={<LeadsPage />} />
+        <Route path="/leads/:id" element={<LeadDetailPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   )
@@ -51,11 +51,13 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="bottom-right" toastOptions={toastConfig} />
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Toaster position="bottom-right" toastOptions={toastConfig} />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }

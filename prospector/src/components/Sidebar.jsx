@@ -1,87 +1,69 @@
+import React from 'react'
 import { NavLink } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  Users,
-  UserPlus,
-  Settings,
-  Zap,
-  LogOut,
-} from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { LayoutDashboard, Users, MessageSquare, Settings, Zap } from 'lucide-react'
 
-const NAV = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
+const NAV_ITEMS = [
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/leads', icon: Users, label: 'Leads' },
-  { to: '/add', icon: UserPlus, label: 'Novo Lead' },
-  { to: '/settings', icon: Settings, label: 'Config' },
+  { to: '/templates', icon: MessageSquare, label: 'Templates' },
+  { to: '/settings', icon: Settings, label: 'Configurações' },
 ]
 
 export default function Sidebar() {
   return (
     <>
-      {/* ── Desktop sidebar ── */}
-      <aside className="hidden md:flex w-56 shrink-0 h-screen sticky top-0 flex-col border-r border-zinc-800 bg-zinc-950">
-        {/* Logo */}
-        <div className="h-14 flex items-center gap-2.5 px-5 border-b border-zinc-800">
-          <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-            <Zap size={14} className="text-zinc-950" fill="currentColor" />
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 z-30">
+        <div className="flex items-center gap-2 px-5 py-5 border-b border-gray-100">
+          <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="font-semibold text-sm tracking-tight text-zinc-100">
-            Prospector
-          </span>
+          <span className="font-bold text-gray-900 text-sm">Prospector</span>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 p-3 space-y-0.5">
-          {NAV.map(({ to, icon: Icon, label, end }) => (
+        <nav className="flex-1 p-3 space-y-1">
+          {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
-              end={end}
+              end={to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-100 ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-zinc-800 text-zinc-100 font-medium'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+                    ? 'bg-brand-50 text-brand-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`
               }
             >
-              <Icon size={16} />
-              {label}
+              {({ isActive }) => (
+                <>
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-brand-500' : 'text-gray-400'}`} />
+                  {label}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-zinc-800 flex items-center justify-between">
-          <p className="text-xs text-zinc-600 font-mono">v1.0.0</p>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="text-zinc-600 hover:text-zinc-300 transition-colors"
-            title="Sair"
-          >
-            <LogOut size={14} />
-          </button>
-        </div>
       </aside>
 
-      {/* ── Mobile bottom nav ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex border-t border-zinc-800 bg-zinc-950">
-        {NAV.map(({ to, icon: Icon, label, end }) => (
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 flex">
+        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
-            end={end}
+            end={to === '/'}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-1 py-3 text-[10px] transition-colors ${
-                isActive
-                  ? 'text-brand-400'
-                  : 'text-zinc-500'
+              `flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors ${
+                isActive ? 'text-brand-600' : 'text-gray-400'
               }`
             }
           >
-            <Icon size={20} />
-            {label}
+            {({ isActive }) => (
+              <>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-500' : 'text-gray-400'}`} />
+                {label}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
