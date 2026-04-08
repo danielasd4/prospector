@@ -120,7 +120,7 @@ export default function AddLead() {
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">

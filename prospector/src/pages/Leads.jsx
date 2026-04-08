@@ -68,7 +68,7 @@ export default function Leads() {
   const setFilter = (k, v) => setFilters((f) => ({ ...f, [k]: v }))
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -126,7 +126,7 @@ export default function Leads() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Leads list */}
       <div className="card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 gap-2 text-zinc-500">
@@ -139,32 +139,49 @@ export default function Leads() {
             <p className="text-zinc-600 text-xs mt-1">Tente mudar os filtros ou adicionar novos leads.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-800">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Nome</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Segmento</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Contato</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Último contato</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800/60">
-                {leads.map((lead) => (
-                  <LeadRow
-                    key={lead.id}
-                    lead={lead}
-                    messageTemplate={messageTemplate}
-                    onUpdate={handleUpdate}
-                    onEdit={setEditingLead}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Mobile: cards */}
+            <div className="md:hidden divide-y divide-zinc-800/60">
+              {leads.map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  messageTemplate={messageTemplate}
+                  onUpdate={handleUpdate}
+                  onEdit={setEditingLead}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800">
+                    <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Nome</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Segmento</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Contato</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Último contato</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/60">
+                  {leads.map((lead) => (
+                    <LeadRow
+                      key={lead.id}
+                      lead={lead}
+                      messageTemplate={messageTemplate}
+                      onUpdate={handleUpdate}
+                      onEdit={setEditingLead}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -267,5 +284,57 @@ function LeadRow({ lead, messageTemplate, onUpdate, onEdit, onDelete }) {
         </div>
       </td>
     </tr>
+  )
+}
+
+function LeadCard({ lead, messageTemplate, onUpdate, onEdit, onDelete }) {
+  return (
+    <div className="p-4">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="font-medium text-zinc-100 text-sm truncate">
+            {lead.nome}
+            {lead.mensagem_enviada && <span className="text-brand-500 ml-1 text-xs">✓</span>}
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            {lead.segmento && (
+              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-md">{lead.segmento}</span>
+            )}
+            {lead.cidade && (
+              <div className="flex items-center gap-1">
+                <MapPin size={10} className="text-zinc-600" />
+                <span className="text-xs text-zinc-500">{lead.cidade}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <StatusBadge status={lead.status} />
+      </div>
+
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex flex-col gap-0.5">
+          {lead.telefone && (
+            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+              <Phone size={10} className="text-zinc-600" />
+              {lead.telefone}
+            </div>
+          )}
+          {lead.instagram && (
+            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+              <Instagram size={10} className="text-zinc-600" />
+              {lead.instagram}
+            </div>
+          )}
+        </div>
+        <QuickActions
+          lead={lead}
+          messageTemplate={messageTemplate}
+          onUpdate={onUpdate}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          compact
+        />
+      </div>
+    </div>
   )
 }

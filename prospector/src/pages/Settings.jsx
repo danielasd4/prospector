@@ -47,7 +47,7 @@ export default function Settings() {
   const maskKey = (k) => k ? k.slice(0, 8) + '••••••••' + k.slice(-4) : '—'
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-zinc-100">Configurações</h1>
         <p className="text-sm text-zinc-500 mt-0.5">Personalize o comportamento do sistema</p>

@@ -34,15 +34,15 @@ export default function Dashboard() {
     : 0
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <h1 className="text-xl font-semibold text-zinc-100">Dashboard</h1>
         <p className="text-sm text-zinc-500 mt-0.5">Visão geral da sua prospecção</p>
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6 md:mb-8">
         {METRIC_CARDS.map(({ key, label, icon: Icon, color, bg }) => (
           <div key={key} className="card p-4">
             <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-3`}>
@@ -57,9 +57,9 @@ export default function Dashboard() {
       </div>
 
       {/* Conversion + CTA row */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 md:mb-8">
         {/* Conversion rate */}
-        <div className="card p-5 col-span-1">
+        <div className="card p-5 md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={14} className="text-brand-400" />
             <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
@@ -83,7 +83,7 @@ export default function Dashboard() {
         {/* Quick add CTA */}
         <Link
           to="/add"
-          className="card p-5 col-span-2 border-dashed hover:border-brand-500/40 hover:bg-zinc-900/80
+          className="card p-5 md:col-span-2 border-dashed hover:border-brand-500/40 hover:bg-zinc-900/80
                      transition-all group flex items-center justify-between"
         >
           <div>
