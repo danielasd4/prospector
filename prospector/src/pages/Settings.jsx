@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Save, Loader2, MessageCircle, Key, Info, Eye, EyeOff, RotateCcw } from 'lucide-react'
+import { Save, Loader2, MessageCircle, Key, Info, Eye, EyeOff, RotateCcw, LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { getConfig, setConfig } from '../lib/supabase'
+import { getConfig, setConfig, supabase } from '../lib/supabase'
 import { DEFAULT_MESSAGE, formatMessage } from '../lib/whatsapp'
 
 const LEAD_EXAMPLE = { nome: 'Clínica Bella Forma', segmento: 'Clínica estética', cidade: 'São Paulo' }
@@ -169,6 +169,23 @@ export default function Settings() {
               Copie o <code className="text-zinc-300 font-mono">.env.example</code> como base.
               Reinicie o servidor após alterar.
             </p>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-200">Sair da conta</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Encerra sua sessão atual</p>
+            </div>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="btn-secondary text-red-400 border-red-500/20 hover:bg-red-500/10"
+            >
+              <LogOut size={14} />
+              Sair
+            </button>
           </div>
         </div>
       </div>
