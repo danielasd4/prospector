@@ -21,6 +21,7 @@ export async function processLeadFromGoogleLink(
   // 3. Build partial lead
   const partial: Partial<Lead> = {
     ...extracted,
+    nome: extracted.nome || 'Lead sem nome',
     segmento,
     google_link: googleLink,
     status: 'novo' as LeadStatus,
