@@ -5,7 +5,7 @@ import { StatusBadge } from './StatusBadge'
 import { ScoreBadge } from './ScoreBadge'
 import { formatDate } from '../utils/date'
 import { useNavigate } from 'react-router-dom'
-import { useUpdateLead, useWhatsAppAction, useDeleteLead } from '../hooks/useLeads'
+import { useUpdateLead, useWhatsAppDBUpdate, useDeleteLead, getWhatsAppUrl } from '../hooks/useLeads'
 import toast from 'react-hot-toast'
 
 interface LeadCardProps {
@@ -16,8 +16,13 @@ interface LeadCardProps {
 export function LeadCard({ lead, onEdit }: LeadCardProps) {
   const navigate = useNavigate()
   const updateMutation = useUpdateLead()
-  const whatsappMutation = useWhatsAppAction()
+  const whatsappDB = useWhatsAppDBUpdate()
   const deleteMutation = useDeleteLead()
+
+  function handleWhatsApp() {
+    window.open(getWhatsAppUrl(lead), '_blank')
+    whatsappDB.mutate(lead)
+  }
 
   function changeStatus(status: Lead['status']) {
     updateMutation.mutate({ id: lead.id, updates: { status } }, {
@@ -74,7 +79,7 @@ export function LeadCard({ lead, onEdit }: LeadCardProps) {
       <div className="flex items-center gap-1.5 flex-wrap">
         {lead.telefone && (
           <button
-            onClick={() => whatsappMutation.mutate(lead)}
+            onClick={handleWhatsApp}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-400 active:scale-95 text-white text-xs font-bold transition-all shadow-lg shadow-green-500/20"
           >
             <MessageCircle className="w-3.5 h-3.5" /> WhatsApp

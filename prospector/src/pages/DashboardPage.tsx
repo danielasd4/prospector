@@ -5,7 +5,7 @@ import { StatusBadge } from '../components/StatusBadge'
 import { ScoreBadge } from '../components/ScoreBadge'
 import { LoadingState } from '../components/LoadingState'
 import { Users, MessageCircle, CheckCircle, TrendingUp, ChevronRight, ArrowRight, Zap } from 'lucide-react'
-import { useWhatsAppAction } from '../hooks/useLeads'
+import { useWhatsAppDBUpdate, getWhatsAppUrl } from '../hooks/useLeads'
 
 function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: any; color: string }) {
   return (
@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const { data: stats, isLoading: loadingStats } = useDashboardStats()
   const { data: followups = [] } = useFollowupLeads()
   const { data: nextLead } = useNextLead()
-  const whatsappMutation = useWhatsAppAction()
+  const whatsappDB = useWhatsAppDBUpdate()
 
   const taxaResposta = stats?.contatado > 0
     ? Math.round((stats.respondeu / (stats.contatado + stats.respondeu)) * 100)
@@ -88,7 +88,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   {lead.telefone && (
-                    <button onClick={() => whatsappMutation.mutate(lead)}
+                    <button onClick={() => { window.open(getWhatsAppUrl(lead), '_blank'); whatsappDB.mutate(lead) }}
                       className="p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-white transition-all" title="WhatsApp">
                       <MessageCircle className="w-4 h-4" />
                     </button>

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getLeadById, getInteractionLogs, addInteractionLog } from '../lib/supabase'
-import { useUpdateLead, useWhatsAppAction } from '../hooks/useLeads'
+import { useUpdateLead, useWhatsAppDBUpdate, getWhatsAppUrl } from '../hooks/useLeads'
 import { StatusBadge } from '../components/StatusBadge'
 import { ScoreBadge } from '../components/ScoreBadge'
 import { LeadModal } from '../components/LeadModal'
@@ -29,7 +29,7 @@ export default function LeadDetailPage() {
   const qc = useQueryClient()
   const [editing, setEditing] = useState(false)
   const updateMutation = useUpdateLead()
-  const whatsappMutation = useWhatsAppAction()
+  const whatsappDB = useWhatsAppDBUpdate()
 
   const { data: lead, isLoading } = useQuery({
     queryKey: ['lead', id],
@@ -115,7 +115,7 @@ export default function LeadDetailPage() {
         <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Ações</h2>
         <div className="flex flex-wrap gap-2">
           {lead.telefone && (
-            <button onClick={() => whatsappMutation.mutate(lead)}
+            <button onClick={() => { window.open(getWhatsAppUrl(lead), '_blank'); whatsappDB.mutate(lead) }}
               className="flex items-center gap-2 bg-green-500 hover:bg-green-400 active:scale-95 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-green-500/20">
               <MessageCircle className="w-4 h-4" /> WhatsApp
             </button>

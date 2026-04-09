@@ -30,24 +30,23 @@ export function useDeleteLead() {
   })
 }
 
-export function useWhatsAppAction() {
+// Só atualiza o banco — abrir o WhatsApp deve ser feito no onClick do componente
+export function useWhatsAppDBUpdate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (lead: Lead) => {
-      // Abre PRIMEIRO (síncrono) — browser bloqueia window.open após await
-      const url = lead.whatsapp_link || buildWhatsAppLink(lead.telefone || '', lead.mensagem_gerada || '')
-      openWhatsApp(url)
-
-      // Atualiza banco em background
       const now = new Date().toISOString()
-      const updates: Partial<Lead> = {
+      await updateLead(lead.id, {
         status: 'contatado',
         data_ultimo_contato: now,
         data_primeiro_contato: lead.data_primeiro_contato || now,
-      }
-      await updateLead(lead.id, updates)
+      })
       await addInteractionLog(lead.id, 'whatsapp_opened', 'WhatsApp iniciado com mensagem automática')
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
   })
+}
+
+export function getWhatsAppUrl(lead: Lead): string {
+  return lead.whatsapp_link || buildWhatsAppLink(lead.telefone || '', lead.mensagem_gerada || '')
 }
