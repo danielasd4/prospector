@@ -34,17 +34,19 @@ export function useWhatsAppAction() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (lead: Lead) => {
+      // Abre PRIMEIRO (síncrono) — browser bloqueia window.open após await
+      const url = lead.whatsapp_link || buildWhatsAppLink(lead.telefone || '', lead.mensagem_gerada || '')
+      openWhatsApp(url)
+
+      // Atualiza banco em background
       const now = new Date().toISOString()
       const updates: Partial<Lead> = {
         status: 'contatado',
-        mensagem_enviada: true,
         data_ultimo_contato: now,
         data_primeiro_contato: lead.data_primeiro_contato || now,
       }
       await updateLead(lead.id, updates)
       await addInteractionLog(lead.id, 'whatsapp_opened', 'WhatsApp iniciado com mensagem automática')
-      const url = lead.whatsapp_link || buildWhatsAppLink(lead.telefone || '', lead.mensagem_gerada || '')
-      openWhatsApp(url)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
   })

@@ -56,6 +56,7 @@ export default function LeadDetailPage() {
   async function sendFollowup(which: 1 | 2) {
     if (!lead) return
     const msg = which === 1 ? FOLLOWUP_1 : FOLLOWUP_2
+    // Abre PRIMEIRO antes de qualquer await
     openWhatsApp(buildWhatsAppLink(lead.telefone || '', msg))
     const now = new Date().toISOString()
     updateMutation.mutate({ id: lead.id, updates: { data_ultimo_contato: now, ...(which === 1 ? { followup_1_enviado: true } : { followup_2_enviado: true }) } })
