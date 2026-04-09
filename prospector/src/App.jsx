@@ -11,6 +11,7 @@ import LeadsPage from './pages/LeadsPage'
 import LeadDetailPage from './pages/LeadDetailPage'
 import TemplatesPage from './pages/TemplatesPage'
 import SettingsPage from './pages/SettingsPage'
+import AnalyticsPage from './pages/AnalyticsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ function AppRoutes() {
         <Route path="/leads/:id" element={<LeadDetailPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
