@@ -163,8 +163,6 @@ function App() {
   const insights = generateInsights(companies, transactions, products, recurringBills);
 
   // Bypass de Autenticação para Desenvolvimento
-  const [isDemoMode, setIsDemoMode] = useState(true);
-
   if (!session && !isDemoMode) {
     return (
       <div className="relative">
