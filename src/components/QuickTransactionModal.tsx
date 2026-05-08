@@ -133,7 +133,16 @@ export const QuickTransactionModal = ({ isOpen, onClose, companies, products, on
 
           {/* Descrição */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Descrição / Título</label>
+            <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest ml-1">
+              {(() => {
+                const selectedCompany = companies.find(c => c.id === data.company_id);
+                const isFamily = selectedCompany?.context_type === 'family' || selectedCompany?.company_type === 'Financeiro Pessoal';
+                if (isFamily) {
+                  return data.type === 'income' ? "De onde veio esse dinheiro?" : "O que é esse gasto da casa?";
+                }
+                return "Descrição / Título";
+              })()}
+            </label>
             <input 
               type="text" 
               value={data.description}
@@ -145,7 +154,7 @@ export const QuickTransactionModal = ({ isOpen, onClose, companies, products, on
                 if (isFamily) {
                   return data.type === 'income' 
                     ? "Ex: Salário Daniel, Salário Adrieli, Entrada Extra..." 
-                    : "Ex: Conta de Luz, Mercado do Mês, Parcela do Carro...";
+                    : "Ex: Conta de Luz, Mercado, Internet, Cartão, Parcela do Carro, Escola, Farmácia, Assinaturas...";
                 }
                 return data.type === 'income'
                   ? "Ex: Consultoria Mensal, Venda de Produto..."

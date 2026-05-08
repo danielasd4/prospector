@@ -104,7 +104,7 @@ export const FamilyOfficeView = ({
       const [topCat, amount] = sortedCats[0];
       insights.push({
         id: 1,
-        text: `Você já gastou ${formatCurrency(amount)} com ${topCat} este mês.`,
+        text: `Vocês já dedicaram ${formatCurrency(amount)} para ${topCat} este mês.`,
         type: amount > 2000 ? 'warning' : 'info'
       });
     }
@@ -112,7 +112,7 @@ export const FamilyOfficeView = ({
     if (metrics.monthlyIncome > 0 && metrics.monthlyExpense > metrics.monthlyIncome) {
       insights.push({
         id: 2,
-        text: "Suas saídas estão superando suas entradas este mês.",
+        text: "As saídas da casa estão superando o que entrou este mês. Atenção ao planejamento!",
         type: "danger"
       });
     } else if (metrics.monthlyIncome > 0) {
@@ -120,7 +120,7 @@ export const FamilyOfficeView = ({
       if (savingsRate > 10) {
         insights.push({
           id: 3,
-          text: `Você está economizando ${savingsRate}% da sua renda familiar este mês.`,
+          text: `Parabéns! Vocês estão poupando ${savingsRate}% da renda familiar este mês.`,
           type: "success"
         });
       }
@@ -268,11 +268,11 @@ export const FamilyOfficeView = ({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-emerald-400 mb-2">
                   <Sparkles size={18} />
-                  <span className="text-xs font-black uppercase tracking-[0.2em]">Inteligência VencerHub</span>
+                  <span className="text-xs font-black uppercase tracking-[0.2em]">Inteligência Vency Hub</span>
                 </div>
                 <h2 className="text-3xl font-bold text-white tracking-tight">Família Barbosa</h2>
                 <p className="text-zinc-400 text-sm max-w-md font-medium">
-                  Seu saldo disponível para lazer e investimentos este mês é de <span className="text-emerald-400 font-bold">{formatCurrency(metrics.monthlyIncome - metrics.monthlyExpense)}</span>.
+                  Planejamento do Casal: Vocês têm <span className="text-emerald-400 font-bold">{formatCurrency(metrics.monthlyIncome - metrics.monthlyExpense)}</span> disponíveis para investimentos ou lazer este mês.
                 </p>
               </div>
               <div className="flex gap-4">
