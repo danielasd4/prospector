@@ -80,9 +80,9 @@ export interface UserProfile {
 
 export function useDashboardData(session: any) {
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductService[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [recurringBills, setRecurringBills] = useState<any[]>([]);
+  const [recurringBills, setRecurringBills] = useState<RecurringBill[]>([]);
   const [collaborators, setCollaborators] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
