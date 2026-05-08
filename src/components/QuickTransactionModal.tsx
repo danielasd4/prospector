@@ -31,7 +31,10 @@ export const QuickTransactionModal = ({ isOpen, onClose, companies, products, on
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setData(initialData);
+        setData({
+          ...initialData,
+          transaction_date: initialData.transaction_date || new Date().toISOString().split('T')[0]
+        });
       } else {
         const familyCompany = companies.find(c => c.context_type === 'family' || c.company_type === 'Financeiro Pessoal');
         const defaultCompany = familyCompany || companies[0];

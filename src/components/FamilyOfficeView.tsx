@@ -31,7 +31,9 @@ import {
   Send,
   Sparkles,
   ChevronLeft,
-  TrendingUp
+  TrendingUp,
+  Trash2,
+  Archive
 } from 'lucide-react';
 import { cn, formatCurrency } from '../lib/utils';
 import { Company, Transaction, RecurringBill } from '../hooks/useDashboardData';
@@ -45,6 +47,8 @@ interface FamilyOfficeViewProps {
   recurringBills: RecurringBill[];
   onAddTransaction: (data: any) => void;
   onUpdateTransaction: (id: string, data: any) => void;
+  onEditTransaction?: (tx: any) => void;
+  onDeleteTransaction?: (id: string) => void;
   onAddSubscription?: () => void;
 }
 
@@ -55,6 +59,8 @@ export const FamilyOfficeView = ({
   recurringBills,
   onAddTransaction,
   onUpdateTransaction,
+  onEditTransaction,
+  onDeleteTransaction,
   onAddSubscription
 }: FamilyOfficeViewProps) => {
   const [activeTab, setActiveTab] = useState('visao-geral');
@@ -198,55 +204,23 @@ export const FamilyOfficeView = ({
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar bg-zinc-100/50 p-1 rounded-xl border border-zinc-200/50 w-fit">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
-                  activeTab === tab.id 
-                    ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" 
-                    : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
-                )}
-              >
-                <tab.icon size={14} />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setSubContext('all')}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar bg-zinc-100/50 p-1 rounded-xl border border-zinc-200/50 w-fit">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
-                subContext === 'all' ? "bg-zinc-900 text-white border-zinc-900 shadow-lg shadow-zinc-900/10" : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-300"
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === tab.id 
+                  ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" 
+                  : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
               )}
             >
-              Geral
+              <tab.icon size={14} />
+              {tab.label}
             </button>
-            <button 
-              onClick={() => setSubContext('family')}
-              className={cn(
-                "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
-                subContext === 'family' ? "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm" : "bg-white text-zinc-400 border-zinc-100 hover:border-emerald-200"
-              )}
-            >
-              Família
-            </button>
-            <button 
-              onClick={() => setSubContext('personal')}
-              className={cn(
-                "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
-                subContext === 'personal' ? "bg-indigo-50 text-indigo-600 border-indigo-100 shadow-sm" : "bg-white text-zinc-400 border-zinc-100 hover:border-indigo-200"
-              )}
-            >
-              Pessoal
-            </button>
-          </div>
+          ))}
         </div>
 
         <div className="flex items-center gap-3">
@@ -262,35 +236,34 @@ export const FamilyOfficeView = ({
 
       {activeTab === 'visao-geral' && (
         <div className="space-y-8 animate-in slide-in-from-bottom-4">
-          <div className="glass-card bg-[#0A0A0B] border border-white/[0.03] p-8 md:p-10 relative overflow-hidden group shadow-2xl rounded-[32px]">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/[0.03] blur-[120px] -mr-40 -mt-40 rounded-full group-hover:bg-emerald-500/[0.06] transition-all duration-1000" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/[0.03] blur-[120px] -ml-40 -mb-40 rounded-full group-hover:bg-indigo-500/[0.06] transition-all duration-1000" />
+          <div className="glass-card bg-zinc-900 border-none p-8 relative overflow-hidden group rounded-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
             
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-emerald-400/80 mb-1">
-                  <Sparkles size={16} className="animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Patrimônio Familiar</span>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-emerald-400 mb-2">
+                  <Sparkles size={18} />
+                  <span className="text-xs font-black uppercase tracking-[0.2em]">Inteligência Vency Hub</span>
                 </div>
-                <h2 className="text-4xl font-display font-bold text-white tracking-tight">Família Barbosa</h2>
-                <p className="text-zinc-500 text-sm max-w-md font-medium leading-relaxed">
-                  Planejamento do Casal: Vocês têm <span className="text-emerald-400/90 font-bold">{formatCurrency(metrics.monthlyIncome - metrics.monthlyExpense)}</span> disponíveis para investimentos ou lazer este mês.
+                <h2 className="text-3xl font-bold text-white tracking-tight">Família Barbosa</h2>
+                <p className="text-zinc-400 text-sm max-w-md font-medium leading-relaxed">
+                  Planejamento do Casal: Vocês têm <span className="text-emerald-400 font-bold">{formatCurrency(metrics.monthlyIncome - metrics.monthlyExpense)}</span> disponíveis para investimentos ou lazer este mês.
                 </p>
               </div>
               <div className="flex gap-4">
-                <div className="px-8 py-5 bg-white/[0.02] rounded-[24px] border border-white/[0.05] backdrop-blur-xl text-right group-hover:border-white/10 transition-all duration-500">
-                  <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Dinheiro em Conta</p>
-                  <p className="text-3xl font-display font-bold text-white tracking-tighter">{formatCurrency(metrics.totalBalance)}</p>
+                <div className="px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md text-right">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Dinheiro em Conta</p>
+                  <p className="text-2xl font-bold text-white tracking-tighter">{formatCurrency(metrics.totalBalance)}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardCard title="O que Entrou" value={metrics.monthlyIncome} icon={ArrowUpRight} variant="success" priority="high" soft={true} />
-            <DashboardCard title="O que Saiu" value={metrics.monthlyExpense} icon={ArrowDownLeft} variant="danger" soft={true} />
-            <DashboardCard title="Sobra do Mês" value={metrics.monthlyIncome - metrics.monthlyExpense} icon={Wallet} variant={(metrics.monthlyIncome - metrics.monthlyExpense) >= 0 ? "success" : "danger"} soft={true} />
-            <DashboardCard title="Boletos a Pagar" value={metrics.toPay} icon={Calendar} variant="warning" subtitle="Próximos dias" soft={true} />
+            <DashboardCard title="O que Entrou" value={metrics.monthlyIncome} icon={ArrowUpRight} variant="success" priority="high" />
+            <DashboardCard title="O que Saiu" value={metrics.monthlyExpense} icon={ArrowDownLeft} variant="danger" />
+            <DashboardCard title="Sobra do Mês" value={metrics.monthlyIncome - metrics.monthlyExpense} icon={Wallet} variant={(metrics.monthlyIncome - metrics.monthlyExpense) >= 0 ? "success" : "danger"} />
+            <DashboardCard title="Boletos a Pagar" value={metrics.toPay} icon={Calendar} variant="warning" subtitle="Próximos dias" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -303,18 +276,18 @@ export const FamilyOfficeView = ({
                 <button onClick={() => setActiveTab('transacoes')} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest">Ver Histórico</button>
               </div>
               
-              <div className="glass-card border border-white/50 bg-white/40 shadow-sm p-4 rounded-[28px] overflow-hidden">
+              <div className="glass-card">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr>
-                        <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Data</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Descrição</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Valor</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Status</th>
+                      <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                        <th className="px-6 py-4 text-[11px] font-black text-zinc-400 uppercase tracking-widest">Data</th>
+                        <th className="px-6 py-4 text-[11px] font-black text-zinc-400 uppercase tracking-widest">Descrição</th>
+                        <th className="px-6 py-4 text-[11px] font-black text-zinc-400 uppercase tracking-widest">Valor</th>
+                        <th className="px-6 py-4 text-[11px] font-black text-zinc-400 uppercase tracking-widest">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-50/50">
+                    <tbody className="divide-y divide-zinc-100">
                       {transactions.slice(0, 5).map(tx => (
                         <tr key={tx.id} className="hover:bg-zinc-50 transition-colors group">
                           <td className="px-6 py-4">
@@ -368,7 +341,7 @@ export const FamilyOfficeView = ({
                 <Calendar size={18} className="text-amber-500" />
                 Próximos Vencimentos
               </h3>
-              <div className="glass-card border border-white/50 bg-white/40 shadow-sm p-5 space-y-4 rounded-[28px]">
+              <div className="glass-card p-4 space-y-3">
                 {recurringBills
                   .filter(bill => familyCompanyIds.includes(bill.company_id))
                   .slice(0, 3)
@@ -449,8 +422,35 @@ export const FamilyOfficeView = ({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right font-black text-sm">{tx.type === 'expense' ? '-' : '+'} {formatCurrency(tx.amount || 0)}</td>
-                      <td className="px-6 py-4 text-center">
-                        <button onClick={() => onUpdateTransaction(tx.id, tx)} className="btn-ghost p-1"><Settings size={14}/></button>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <button 
+                            onClick={() => onUpdateTransaction(tx.id, { ...tx, status: tx.status === 'paid' ? 'pending' : 'paid' })}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              tx.status === 'paid' ? "text-emerald-500 hover:bg-emerald-50" : "text-zinc-400 hover:bg-zinc-100"
+                            )}
+                            title={tx.status === 'paid' ? "Marcar como pendente" : "Marcar como pago"}
+                          >
+                            <div className="w-4 h-4 border-2 border-current rounded-sm flex items-center justify-center">
+                              {tx.status === 'paid' && <div className="w-2 h-2 bg-current rounded-sm" />}
+                            </div>
+                          </button>
+                          <button 
+                            onClick={() => onEditTransaction ? onEditTransaction(tx) : onUpdateTransaction(tx.id, tx)}
+                            className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-all"
+                            title="Editar transação"
+                          >
+                            <Settings size={14} />
+                          </button>
+                          <button 
+                            onClick={() => onDeleteTransaction && onDeleteTransaction(tx.id)}
+                            className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                            title="Excluir permanentemente"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

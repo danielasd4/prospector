@@ -140,6 +140,7 @@ function App() {
     updateTransaction,
     deleteTransaction,
     hardDeleteTransaction,
+    addCompany,
     updateCompany,
     deleteCompany,
     addRecurringBill,
@@ -271,8 +272,10 @@ function App() {
                 transactions={financialEngine.family.transactions}
                 personalTransactions={financialEngine.personal.transactions}
                 recurringBills={recurringBills}
-                onAddTransaction={(data: any) => { setEditingTransaction(data); setIsModalOpen(true); }}
+                onAddTransaction={(data: any) => { setEditingTransaction({ ...data, context_type: 'family' }); setIsModalOpen(true); }}
                 onUpdateTransaction={updateTransaction}
+                onEditTransaction={(tx: any) => { setEditingTransaction(tx); setIsModalOpen(true); }}
+                onDeleteTransaction={hardDeleteTransaction}
                 onAddSubscription={() => setIsSubscriptionModalOpen(true)}
               />
             )}
@@ -289,6 +292,7 @@ function App() {
                 onDeleteProduct={deleteProduct}
                 onAddCollaborator={addCollaborator}
                 onDeleteCollaborator={deleteCollaborator}
+                onAddCompany={addCompany}
                 onUpdateCompany={updateCompany}
                 onDeleteCompany={deleteCompany}
                 onAddTransaction={(data: any) => { setEditingTransaction({ ...data, context_type: 'business' }); setIsModalOpen(true); }}

@@ -235,6 +235,19 @@ export function useDashboardData(session: any) {
     const company = companies.find(c => c.id === data.company_id);
     const contextType = data.context_type || company?.context_type || (company?.company_type === 'Financeiro Pessoal' ? 'family' : 'business');
 
+    // Prevenção de duplicidade (mesma descrição, valor, conta e data nos últimos 5 segundos de dados carregados)
+    const isDuplicate = transactions.some(t => 
+      t.description === data.description && 
+      Number(t.amount) === Number(data.amount) && 
+      t.transaction_date === data.transaction_date &&
+      t.company_id === data.company_id
+    );
+
+    if (isDuplicate) {
+      console.warn("[Backend] Lançamento duplicado detectado e bloqueado.");
+      return;
+    }
+
     const { error } = await supabase.from('transactions').insert({ 
       ...data, 
       user_id: session.user.id,
@@ -284,6 +297,24 @@ export function useDashboardData(session: any) {
     if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('collaborators').delete().eq('id', id);
     if (error) throw error;
+    await fetchData();
+  };
+
+  const addCompany = async (data: any) => {
+    if (!session?.user?.id || session.user.id === 'demo-user-id') return;
+    
+    // Evitar duplicação por cliques múltiplos rápidos
+    const isDuplicate = companies.some(c => c.name === data.name && c.company_type === data.company_type);
+    if (isDuplicate) {
+      console.warn("[Backend] Tentativa de criar empresa duplicada bloqueada.");
+      return;
+    }
+
+    const { error } = await supabase.from('companies').insert({ ...data, user_id: session.user.id, is_archived: false });
+    if (error) {
+      console.error("[Backend Error] Falha ao adicionar empresa:", error.message);
+      throw new Error("Erro ao criar nova conta/empresa.");
+    }
     await fetchData();
   };
 
@@ -444,6 +475,7 @@ export function useDashboardData(session: any) {
     updateTransaction,
     deleteTransaction,
     hardDeleteTransaction: deleteTransaction,
+    addCompany,
     updateCompany,
     deleteCompany,
     addRecurringBill,

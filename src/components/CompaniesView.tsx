@@ -49,8 +49,9 @@ interface CompaniesViewProps {
   onDeleteProduct: (id: string) => Promise<void>;
   onAddCollaborator: (data: any) => Promise<void>;
   onDeleteCollaborator: (id: string) => Promise<void>;
-  onUpdateCompany: (data: any) => Promise<void>;
-  onDeleteCompany: () => Promise<void>;
+  onAddCompany: (data: any) => Promise<void>;
+  onUpdateCompany: (id: string, data: any) => Promise<void>;
+  onDeleteCompany: (id: string) => Promise<void>;
   forceSelectedId?: string;
   onAddTransaction?: (data: any) => void;
   onUpdateTransaction?: (id: string, data: any) => void;
@@ -66,6 +67,7 @@ export const CompaniesView = ({
   onDeleteProduct,
   onAddCollaborator,
   onDeleteCollaborator,
+  onAddCompany,
   onUpdateCompany,
   onDeleteCompany,
   forceSelectedId,
@@ -79,8 +81,8 @@ export const CompaniesView = ({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductService | null>(null);
-  const [showCollabForm, setShowCollabForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newCollab, setNewCollab] = useState({ name: '', role: '', monthly_cost: 0 });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -250,12 +252,20 @@ export const CompaniesView = ({
     return (
       <div className="space-y-6 animate-in fade-in duration-300">
         <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-6">
-          <div>
+          <div className="flex flex-col">
             <h1 className="text-2xl font-display font-semibold tracking-tight text-zinc-900 mb-1">Empresas</h1>
             <p className="text-[13px] text-zinc-500 font-medium">Selecione uma operação para análise estratégica ou gerencie sua equipe.</p>
           </div>
 
-          <div className="flex flex-wrap gap-4 p-4 bg-zinc-50 border border-zinc-100 rounded-xl">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="btn-primary h-11 px-6 text-sm"
+            >
+              <Plus size={18} className="mr-2" />
+              Nova Empresa
+            </button>
+            <div className="flex flex-wrap gap-4 p-3 bg-zinc-50 border border-zinc-100 rounded-xl">
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Caixa Total (R$)</span>
               <input 
@@ -330,6 +340,17 @@ export const CompaniesView = ({
             );
           })}
         </div>
+
+        {showAddModal && (
+          <CompanyEditModal 
+            company={{ name: '', company_type: 'Prestação de Serviço', status: 'Ativa', predictability: 'Fixa', revenue_goal: 0 }}
+            onClose={() => setShowAddModal(false)}
+            onSave={async (data: any) => {
+              await onAddCompany(data);
+              setShowAddModal(false);
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -432,8 +453,8 @@ export const CompaniesView = ({
             await onUpdateCompany(selectedCompany.id, data);
             setShowEditModal(false);
           }}
-          onDelete={async () => {
-            await onDeleteCompany(selectedCompany.id);
+          onDelete={async (id: string) => {
+            await onDeleteCompany(id);
             setSelectedCompanyId(null);
             setShowEditModal(false);
           }}
@@ -1042,17 +1063,24 @@ const CompanyEditModal = ({ onClose, company, onSave, onDelete }: any) => {
 
           <div className="pt-4 flex gap-3 border-t border-zinc-100 mt-6">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancelar</button>
-            <button 
-              type="button" 
-              onClick={async () => {
-                if(confirm('Tem certeza que deseja excluir esta empresa? Todos os dados vinculados serão perdidos.')) {
-                  await onDelete();
-                }
-              }} 
-              className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-md font-medium text-[13px] transition-colors"
-            >
-              Excluir
-            </button>
+            {company.id && (
+              <button 
+                type="button" 
+                onClick={async () => {
+                  if(confirm('Tem certeza que deseja excluir esta empresa? Todos os dados vinculados serão perdidos.')) {
+                    try {
+                      await onDelete(company.id);
+                      onClose();
+                    } catch (e: any) {
+                      alert(e.message || 'Erro ao excluir empresa. Verifique se há transações vinculadas.');
+                    }
+                  }
+                }} 
+                className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-md font-medium text-[13px] transition-colors"
+              >
+                Excluir
+              </button>
+            )}
             <button type="submit" disabled={loading} className="btn-primary flex-1">
               {loading ? 'Salvando...' : 'Salvar Metas'}
             </button>
