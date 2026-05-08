@@ -122,57 +122,72 @@ export function useDashboardData(session: any) {
     setUserProfile(null);
 
     try {
-      // 1. Fetch User Profile & Settings
-      let { data: profile, error: profileError } = await supabase
-        .from('user_profile_settings')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+      // Fetch Core Data em Paralelo
+      const [profileRes, compsRes, txsRes, prodsRes, billsRes, collabsRes] = await Promise.all([
+        supabase.from('user_profile_settings').select('*').eq('user_id', session.user.id).maybeSingle(),
+        supabase.from('companies').select('*').eq('user_id', session.user.id).eq('is_archived', false).order('name'),
+        supabase.from('transactions').select('*').eq('user_id', session.user.id).eq('is_archived', false).order('transaction_date', { ascending: false }),
+        supabase.from('products_services').select('*').eq('user_id', session.user.id).eq('is_archived', false),
+        supabase.from('recurring_bills').select('*').eq('user_id', session.user.id).eq('is_archived', false),
+        supabase.from('collaborators').select('*').eq('user_id', session.user.id)
+      ]);
 
-      // MIGRATION LOGIC: LocalStorage -> Supabase
-      if (profileError || !profile) {
-        const savedSettings = localStorage.getItem('user_settings');
-        const hasCompletedOnboarding = localStorage.getItem('has_completed_onboarding') === 'true';
-        
-        const initialSettings = savedSettings ? JSON.parse(savedSettings) : {
-          totalCash: 0,
-          totalFixedCosts: 0,
-          minHourlyRate: 0
-        };
+      let profile = profileRes.data;
 
-        const { data: newProfile, error: createError } = await supabase
+      // Se não houver perfil, criar um inicial silenciosamente
+      if (!profileRes.error && !profile) {
+        const { data: newProfile } = await supabase
           .from('user_profile_settings')
           .insert({
             user_id: session.user.id,
-            total_cash: initialSettings.totalCash || 0,
-            total_fixed_costs: initialSettings.totalFixedCosts || 0,
-            min_hourly_rate: initialSettings.minHourlyRate || 0,
-            has_completed_onboarding: hasCompletedOnboarding
+            total_cash: 0,
+            total_fixed_costs: 0,
+            min_hourly_rate: 0,
+            has_completed_onboarding: true
           })
           .select()
           .maybeSingle();
-
-        if (createError) {
-      console.error("[Supabase Error] Erro ao criar perfil inicial:", createError);
-      // Não lançar erro aqui para não bloquear o app, mas logar para debug
-    } else {
-      profile = newProfile;
-    }
-      } else if (profileError) {
-        throw profileError;
+        profile = newProfile;
       }
+      
       setUserProfile(profile);
 
-      // 2. Fetch Core Data
-      const [compsRes, txsRes, prodsRes, billsRes, collabsRes] = await Promise.all([
-        supabase.from('companies').select('*').eq('is_archived', false).order('name'),
-        supabase.from('transactions').select('*').eq('is_archived', false).order('transaction_date', { ascending: false }),
-        supabase.from('products_services').select('*').eq('is_archived', false),
-        supabase.from('recurring_bills').select('*').eq('is_archived', false),
-        supabase.from('collaborators').select('*')
-      ]);
+      let finalCompanies = compsRes.data || [];
 
-      setCompanies(compsRes.data || []);
+      // SILENT INITIALIZATION: Criar empresas padrão se não houver nenhuma
+      if (!compsRes.error && finalCompanies.length === 0) {
+        console.log("[Init] Criando estrutura padrão silenciosa...");
+        const { data: newCos, error: initError } = await supabase
+          .from('companies')
+          .insert([
+            { 
+              user_id: session.user.id, 
+              name: 'Minha Empresa', 
+              company_type: 'Serviços', 
+              context_type: 'business',
+              status: 'Ativa' 
+            },
+            { 
+              user_id: session.user.id, 
+              name: 'Finanças Família', 
+              company_type: 'Financeiro Pessoal', 
+              context_type: 'family',
+              status: 'Ativa' 
+            }
+          ])
+          .select();
+        
+        if (!initError && newCos) {
+          finalCompanies = newCos;
+          // Marcar onboarding como concluído silenciosamente
+          await supabase
+            .from('user_profile_settings')
+            .update({ has_completed_onboarding: true })
+            .eq('user_id', session.user.id);
+        }
+      }
+
+      setCompanies(finalCompanies);
       setTransactions(txsRes.data || []);
       setProducts(prodsRes.data || []);
       setRecurringBills(billsRes.data || []);

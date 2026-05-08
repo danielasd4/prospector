@@ -11,10 +11,10 @@ export const Auth = ({ onLogin }: AuthProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
   // Limpar estados ao trocar de aba
   React.useEffect(() => {
@@ -30,28 +30,24 @@ export const Auth = ({ onLogin }: AuthProps) => {
     setSuccess(null);
 
     if (isSignUp) {
-      console.log("[Auth] Iniciando processo de SIGNUP (Criar Conta)...");
+      console.log("[Auth] Criando conta...");
       try {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
         });
 
-        console.log("[Auth] Resposta do Supabase SignUp:", { data, error: signUpError });
-
         if (signUpError) throw signUpError;
         
         if (data.session) {
-          console.log("[Auth] Cadastro e Login Automático bem sucedidos.");
           onLogin();
         } else {
-          setSuccess('Cadastro realizado! Verifique seu e-mail para confirmar a conta.');
+          setSuccess('Conta criada! Verifique seu e-mail para confirmar o acesso.');
           setIsSignUp(false);
         }
       } catch (err: any) {
-        console.error("[Auth] Erro no SignUp:", err.message);
         if (err.message.includes("already registered")) {
-          setError("Este e-mail já possui cadastro. Tente entrar ou use outro e-mail.");
+          setError("Este e-mail já possui cadastro. Tente entrar.");
         } else {
           setError(err.message);
         }
@@ -59,21 +55,16 @@ export const Auth = ({ onLogin }: AuthProps) => {
         setLoading(false);
       }
     } else {
-      console.log("[Auth] Iniciando processo de SIGNIN (Entrar)...");
+      console.log("[Auth] Acessando Hub...");
       try {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        console.log("[Auth] Resposta do Supabase SignIn:", { data, error: signInError });
-
         if (signInError) throw signInError;
-        
-        console.log("[Auth] Login bem sucedido.");
         onLogin();
       } catch (err: any) {
-        console.error("[Auth] Erro no SignIn:", err.message);
         if (err.message.includes("Invalid login credentials")) {
           setError("E-mail ou senha incorretos.");
         } else {
@@ -86,82 +77,90 @@ export const Auth = ({ onLogin }: AuthProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-primary to-primary-hover flex items-center justify-center shadow-2xl shadow-primary/40 mb-6 group transition-transform hover:scale-105">
-            <span className="font-display font-bold text-white text-4xl leading-none">V</span>
+    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decor - Premium Aura */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full" />
+
+      <div className="w-full max-w-[420px] z-10">
+        {/* Header - Direct & Powerful */}
+        <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="w-14 h-14 rounded-xl bg-white text-black flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.1)] mb-8">
+            <span className="font-display font-black text-2xl tracking-tighter">V</span>
           </div>
-          <h1 className="text-4xl font-display font-bold text-white tracking-tight mb-2">Vency Hub</h1>
-          <p className="text-slate-400 font-medium">Gestão Financeira Estratégica</p>
+          <h1 className="text-4xl font-display font-bold text-white tracking-tighter mb-3">Vency Hub</h1>
+          <p className="text-zinc-500 font-medium text-center text-sm leading-relaxed max-w-[280px]">
+            Gestão empresarial e familiar <br /> unificada em um único lugar.
+          </p>
         </div>
 
-        <div className="glass-card p-8 rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="flex bg-white/5 p-1 rounded-2xl mb-8 border border-white/5">
+        {/* Auth Card */}
+        <div className="glass-card p-8 rounded-[40px] border border-white/5 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
+          <div className="flex bg-white/5 p-1 rounded-2xl mb-10 border border-white/5">
             <button 
               type="button"
               onClick={() => setIsSignUp(false)}
               className={cn(
-                "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                !isSignUp ? "bg-primary text-white shadow-lg" : "text-slate-400 hover:text-slate-200"
+                "flex-1 py-3 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all duration-300",
+                !isSignUp ? "bg-white text-black shadow-xl" : "text-zinc-500 hover:text-zinc-300"
               )}
             >Entrar</button>
             <button 
               type="button"
               onClick={() => setIsSignUp(true)}
               className={cn(
-                "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
-                isSignUp ? "bg-primary text-white shadow-lg" : "text-slate-400 hover:text-slate-200"
+                "flex-1 py-3 text-[12px] font-black uppercase tracking-widest rounded-xl transition-all duration-300",
+                isSignUp ? "bg-white text-black shadow-xl" : "text-zinc-500 hover:text-zinc-300"
               )}
             >Criar Conta</button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold text-center animate-in shake-1">
+              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-bold text-center animate-in shake-1">
                 {error}
               </div>
             )}
             
             {success && (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold text-center animate-in zoom-in-95">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold text-center">
                 {success}
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">E-mail Corporativo ou Pessoal</label>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Identificação</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-primary" size={20} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-white" size={18} />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="exemplo@email.com"
+                  placeholder="Seu e-mail"
                   required
-                  className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-primary focus:bg-primary/5 rounded-2xl pl-12 pr-4 py-4 text-white outline-none transition-all placeholder:text-slate-600 font-medium"
+                  className="w-full bg-white/[0.03] border border-white/5 hover:border-white/10 focus:border-white/20 focus:bg-white/[0.05] rounded-2xl pl-12 pr-4 py-4 text-white outline-none transition-all placeholder:text-zinc-700 text-sm font-medium"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Senha de Acesso</label>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Senha</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-primary" size={20} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 transition-colors group-focus-within:text-white" size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-primary focus:bg-primary/5 rounded-2xl pl-12 pr-12 py-4 text-white outline-none transition-all placeholder:text-slate-600 font-medium"
+                  className="w-full bg-white/[0.03] border border-white/5 hover:border-white/10 focus:border-white/20 focus:bg-white/[0.05] rounded-2xl pl-12 pr-12 py-4 text-white outline-none transition-all placeholder:text-zinc-700 text-sm font-medium"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white transition-colors"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -169,16 +168,20 @@ export const Auth = ({ onLogin }: AuthProps) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-2xl transition-all active:scale-[0.98] shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-8 text-sm"
+              className="w-full bg-white hover:bg-zinc-200 text-black font-black py-4 rounded-2xl transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(255,255,255,0.05)] flex items-center justify-center gap-3 disabled:opacity-50 mt-8 text-[12px] uppercase tracking-widest"
             >
-              {loading ? <Loader2 size={20} className="animate-spin" /> : (isSignUp ? 'Finalizar Cadastro' : 'Acessar Inteligência')}
+              {loading ? <Loader2 size={18} className="animate-spin" /> : (isSignUp ? 'Finalizar Registro' : 'Acessar Painel')}
             </button>
           </form>
         </div>
         
-        <p className="mt-8 text-center text-slate-500 text-xs font-medium">
-          Ao acessar, você concorda com nossos <span className="text-slate-400 hover:underline cursor-pointer">Termos de Uso</span>
-        </p>
+        <div className="mt-12 flex items-center justify-between px-2">
+          <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">v2.4 Production</span>
+          <div className="flex gap-4">
+            <span className="text-[10px] text-zinc-500 hover:text-white cursor-pointer transition-colors font-bold uppercase tracking-widest">Segurança</span>
+            <span className="text-[10px] text-zinc-500 hover:text-white cursor-pointer transition-colors font-bold uppercase tracking-widest">Termos</span>
+          </div>
+        </div>
       </div>
     </div>
   );

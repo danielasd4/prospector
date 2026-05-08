@@ -76,7 +76,7 @@ export const Sidebar = ({ currentView, onNavigate }: { currentView: string, onNa
         <div>
           <p className="px-3 text-[11px] font-medium text-zinc-400 tracking-tight mb-2">Inteligência Estratégica</p>
           <div className="space-y-0.5">
-            <SidebarItem icon={Bot} label="Copiloto IA" active={currentView === 'ia'} onClick={() => onNavigate('ia')} />
+            <SidebarItem icon={Bot} label="Inteligência IA" active={currentView === 'ia'} onClick={() => onNavigate('ia')} />
           </div>
         </div>
       </nav>

@@ -203,14 +203,8 @@ function App() {
       <Sidebar currentView={currentView} onNavigate={setCurrentView} />
       
       <main className="flex-1 p-4 lg:p-10 lg:ml-64 pb-24 lg:pb-10 min-h-screen">
-        {!hasCompletedOnboarding ? (
-          <OnboardingView 
-            onComplete={refresh} 
-            onUpdateUserProfile={updateUserProfile} 
-          />
-        ) : (
-          <ErrorBoundary key={currentView}>
-            {currentView === 'dashboard' && (
+        <ErrorBoundary key={currentView}>
+          {currentView === 'dashboard' && (
               <div className="animate-in fade-in duration-300">
                 <header className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
                   <SectionTitle 
@@ -368,7 +362,6 @@ function App() {
               </div>
             )}
           </ErrorBoundary>
-        )}
       </main>
 
       <MobileNav 
