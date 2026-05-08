@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Target, Lock, Mail, Loader2 } from 'lucide-react';
+import { Target, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface AuthProps {
@@ -14,6 +14,14 @@ export const Auth = ({ onLogin }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Limpar estados ao trocar de aba
+  React.useEffect(() => {
+    setError(null);
+    setSuccess(null);
+    setLoading(false);
+  }, [isSignUp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,34 +29,59 @@ export const Auth = ({ onLogin }: AuthProps) => {
     setError(null);
     setSuccess(null);
 
-    try {
-      if (isSignUp) {
+    if (isSignUp) {
+      console.log("[Auth] Iniciando processo de SIGNUP (Criar Conta)...");
+      try {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
         });
 
+        console.log("[Auth] Resposta do Supabase SignUp:", { data, error: signUpError });
+
         if (signUpError) throw signUpError;
         
         if (data.session) {
+          console.log("[Auth] Cadastro e Login Automático bem sucedidos.");
           onLogin();
         } else {
-          setSuccess('Cadastro realizado! Verifique seu e-mail para confirmar a conta ou tente fazer login.');
+          setSuccess('Cadastro realizado! Verifique seu e-mail para confirmar a conta.');
           setIsSignUp(false);
         }
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+      } catch (err: any) {
+        console.error("[Auth] Erro no SignUp:", err.message);
+        if (err.message.includes("already registered")) {
+          setError("Este e-mail já possui cadastro. Tente entrar ou use outro e-mail.");
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.log("[Auth] Iniciando processo de SIGNIN (Entrar)...");
+      try {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
+        console.log("[Auth] Resposta do Supabase SignIn:", { data, error: signInError });
+
         if (signInError) throw signInError;
+        
+        console.log("[Auth] Login bem sucedido.");
         onLogin();
+      } catch (err: any) {
+        console.error("[Auth] Erro no SignIn:", err.message);
+        if (err.message.includes("Invalid login credentials")) {
+          setError("E-mail ou senha incorretos.");
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro na autenticação.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -66,6 +99,7 @@ export const Auth = ({ onLogin }: AuthProps) => {
         <div className="glass-card p-8 rounded-[32px] border border-white/10 shadow-2xl relative overflow-hidden">
           <div className="flex bg-white/5 p-1 rounded-2xl mb-8 border border-white/5">
             <button 
+              type="button"
               onClick={() => setIsSignUp(false)}
               className={cn(
                 "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
@@ -73,6 +107,7 @@ export const Auth = ({ onLogin }: AuthProps) => {
               )}
             >Entrar</button>
             <button 
+              type="button"
               onClick={() => setIsSignUp(true)}
               className={cn(
                 "flex-1 py-3 text-sm font-bold rounded-xl transition-all",
@@ -114,13 +149,20 @@ export const Auth = ({ onLogin }: AuthProps) => {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-primary" size={20} />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-primary focus:bg-primary/5 rounded-2xl pl-12 pr-4 py-4 text-white outline-none transition-all placeholder:text-slate-600 font-medium"
+                  className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-primary focus:bg-primary/5 rounded-2xl pl-12 pr-12 py-4 text-white outline-none transition-all placeholder:text-slate-600 font-medium"
                 />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 

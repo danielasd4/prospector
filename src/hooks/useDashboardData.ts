@@ -212,9 +212,18 @@ export function useDashboardData(session: any) {
   };
 
   const addTransaction = async (data: Partial<Transaction>) => {
-    if (!session?.user?.id) return;
-    if (session.user.id === 'demo-user-id') return; // Demo Mode
-    const { error } = await supabase.from('transactions').insert({ ...data, user_id: session.user.id });
+    if (!session?.user?.id || session.user.id === 'demo-user-id') return;
+
+    // Buscar o contexto da empresa para vincular à transação
+    const company = companies.find(c => c.id === data.company_id);
+    const contextType = company?.context_type || (company?.company_type === 'Financeiro Pessoal' ? 'family' : 'business');
+
+    const { error } = await supabase.from('transactions').insert({ 
+      ...data, 
+      user_id: session.user.id,
+      context_type: contextType
+    });
+    
     if (error) {
       console.error("[Backend Error] Falha ao adicionar transação:", error.message);
       throw new Error("Erro ao registrar movimentação financeira.");
@@ -341,34 +350,28 @@ export function useDashboardData(session: any) {
     const currMonth = now.getMonth();
     const currYear = now.getFullYear();
 
+    // Trava de segurança para evitar tela branca
+    if (!companies || !transactions || !Array.isArray(companies) || !Array.isArray(transactions)) {
+      return {
+        business: { income: 0, expense: 0, profit: 0, hourlyRate: 0, pendingExpenses: 0, predictableRevenue: 0, variableRevenue: 0, totalHours: 0, transactions: [], companies: [] },
+        family: { income: 0, expense: 0, transactions: [], companies: [] },
+        personal: { income: 0, expense: 0, transactions: [], companies: [] }
+      };
+    }
+
     // 1. Business Logic (PJ)
-    const businessCompanies = companies.filter(c => 
-      !['Financeiro Pessoal', 'Família', 'Pessoal'].includes(c.company_type) && 
-      !c.name.toLowerCase().includes('pf') && 
-      !c.name.toLowerCase().includes('daniel')
-    );
+    const businessCompanies = companies.filter(c => c.context_type === 'business');
     const businessIds = businessCompanies.map(c => c.id);
-    const bizTxs = transactions.filter(t => businessIds.includes(t.company_id));
+    const bizTxs = transactions.filter(t => t.context_type === 'business' || (t.company_id && businessIds.includes(t.company_id)));
     
     // 2. Family Logic (Família/Casa)
-    const familyCompanies = companies.filter(c => 
-      c.company_type === 'Família' || 
-      c.name.toLowerCase().includes('família') || 
-      c.name.toLowerCase().includes('casa') ||
-      c.name.toLowerCase().includes('conjunta')
-    );
+    const familyCompanies = companies.filter(c => c.context_type === 'family');
     const familyIds = familyCompanies.map(c => c.id);
-    const famTxs = transactions.filter(t => familyIds.includes(t.company_id));
+    const famTxs = transactions.filter(t => t.context_type === 'family' || (t.company_id && familyIds.includes(t.company_id)));
 
-    // 3. Personal Logic (Pessoal/Daniel)
-    const personalCompanies = companies.filter(c => 
-      c.company_type === 'Financeiro Pessoal' || 
-      c.company_type === 'Pessoal' ||
-      c.name.toLowerCase().includes('daniel') ||
-      (c.name.toLowerCase().includes('pf') && !c.name.toLowerCase().includes('família'))
-    );
-    const personalIds = personalCompanies.map(c => c.id);
-    const perTxs = transactions.filter(t => personalIds.includes(t.company_id));
+    // Unificar Personal com Family para simplificar
+    const perTxs = famTxs;
+    const personalCompanies = familyCompanies;
 
     const bizMonthTxs = bizTxs.filter(t => {
       const d = new Date(t.transaction_date);
@@ -442,7 +445,7 @@ export function useDashboardData(session: any) {
       contasFuturas: formatCurrency(financialEngine.business.pendingExpenses),
       valorHoraMedio: formatCurrency(financialEngine.business.hourlyRate),
       revenue: financialEngine.business.income,
-      rawTransactions: transactions,
+      rawTransactions: financialEngine.business.transactions,
       receitaVariavel: formatCurrency(financialEngine.business.variableRevenue),
       receitaPrevisivelRaw: financialEngine.business.predictableRevenue,
       receitaPrevisivel: formatCurrency(financialEngine.business.predictableRevenue),

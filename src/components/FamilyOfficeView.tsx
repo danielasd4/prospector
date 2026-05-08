@@ -127,7 +127,7 @@ export const FamilyOfficeView = ({
     }
 
     return insights.length > 0 ? insights : [
-      { id: 0, text: "Continue registrando suas transações para receber análises personalizadas.", type: "success" }
+      { id: 0, text: "Sua casa ainda não tem registros este mês. Que tal começar anotando o mercado ou as contas fixas?", type: "success" }
     ];
   }, [transactions, metrics]);
 
@@ -277,7 +277,7 @@ export const FamilyOfficeView = ({
               </div>
               <div className="flex gap-4">
                 <div className="px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md text-right">
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Patrimônio Líquido</p>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Dinheiro em Conta</p>
                   <p className="text-2xl font-bold text-white">{formatCurrency(metrics.totalBalance)}</p>
                 </div>
               </div>
@@ -285,10 +285,10 @@ export const FamilyOfficeView = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardCard title="Renda Familiar" value={metrics.monthlyIncome} icon={ArrowUpRight} variant="success" priority="high" />
-            <DashboardCard title="Gastos Totais" value={metrics.monthlyExpense} icon={ArrowDownLeft} variant="danger" />
-            <DashboardCard title="Saldo do Mês" value={metrics.monthlyIncome - metrics.monthlyExpense} icon={Wallet} variant={(metrics.monthlyIncome - metrics.monthlyExpense) >= 0 ? "success" : "danger"} />
-            <DashboardCard title="Contas Fixas" value={metrics.toPay} icon={Calendar} variant="warning" subtitle="Pendentes" />
+            <DashboardCard title="O que Entrou" value={metrics.monthlyIncome} icon={ArrowUpRight} variant="success" priority="high" />
+            <DashboardCard title="O que Saiu" value={metrics.monthlyExpense} icon={ArrowDownLeft} variant="danger" />
+            <DashboardCard title="Sobra do Mês" value={metrics.monthlyIncome - metrics.monthlyExpense} icon={Wallet} variant={(metrics.monthlyIncome - metrics.monthlyExpense) >= 0 ? "success" : "danger"} />
+            <DashboardCard title="Boletos a Pagar" value={metrics.toPay} icon={Calendar} variant="warning" subtitle="Próximos dias" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -412,8 +412,8 @@ export const FamilyOfficeView = ({
             <div className="flex items-center gap-2">
               <div className="flex items-center bg-zinc-100/50 p-1 rounded-lg border border-zinc-200">
                 <button onClick={() => setFilterType('all')} className={cn("px-3 py-1 text-[11px] font-bold rounded-md transition-all", filterType === 'all' ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" : "text-zinc-500")}>Tudo</button>
-                <button onClick={() => setFilterType('income')} className={cn("px-3 py-1 text-[11px] font-bold rounded-md transition-all", filterType === 'income' ? "bg-white text-emerald-600 shadow-sm border border-zinc-200" : "text-zinc-500")}>Entradas</button>
-                <button onClick={() => setFilterType('expense')} className={cn("px-3 py-1 text-[11px] font-bold rounded-md transition-all", filterType === 'expense' ? "bg-white text-rose-600 shadow-sm border border-zinc-200" : "text-zinc-500")}>Saídas</button>
+                <button onClick={() => setFilterType('income')} className={cn("px-3 py-1 text-[11px] font-bold rounded-md transition-all", filterType === 'income' ? "bg-white text-emerald-600 shadow-sm border border-zinc-200" : "text-zinc-500")}>O que entrou</button>
+                <button onClick={() => setFilterType('expense')} className={cn("px-3 py-1 text-[11px] font-bold rounded-md transition-all", filterType === 'expense' ? "bg-white text-rose-600 shadow-sm border border-zinc-200" : "text-zinc-500")}>O que saiu</button>
               </div>
               <button className="btn-secondary h-10 px-3"><Filter size={14} /> Filtros</button>
             </div>
@@ -510,7 +510,7 @@ export const FamilyOfficeView = ({
               ))}
             {recurringBills.filter(bill => familyCompanyIds.includes(bill.company_id)).length === 0 && (
               <div className="col-span-full py-20 text-center glass-card border-dashed">
-                <p className="text-zinc-400 font-medium">Nenhuma assinatura recorrente cadastrada.</p>
+                <p className="text-zinc-400 font-medium">Nenhum boleto ou assinatura recorrente da casa cadastrada ainda.</p>
               </div>
             )}
           </div>
@@ -561,8 +561,8 @@ export const FamilyOfficeView = ({
 
             {transactions.filter(tx => (tx.description || '').includes('/')).length === 0 && (
               <div className="py-20 text-center glass-card border-dashed">
-                <p className="text-zinc-400 font-medium">Nenhum parcelamento detectado nas transações.</p>
-                <p className="text-[11px] text-zinc-500 mt-2">Dica: Use o formato "(1/10)" na descrição para rastrear parcelas.</p>
+                <p className="text-zinc-400 font-medium">Não encontramos nenhum parcelamento (como carro ou móveis) por aqui.</p>
+                <p className="text-[11px] text-zinc-500 mt-2">Dica do Casal: Use "(1/10)" na descrição para rastrear as parcelas.</p>
               </div>
             )}
           </div>

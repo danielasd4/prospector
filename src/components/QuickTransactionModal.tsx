@@ -135,11 +135,22 @@ export const QuickTransactionModal = ({ isOpen, onClose, companies, products, on
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Descrição / Título</label>
             <input 
-              type="text"
+              type="text" 
               value={data.description}
               onChange={e => setData({ ...data, description: e.target.value })}
               className="input-premium h-12"
-              placeholder="Ex: Compra Mensal Mercado..."
+              placeholder={(() => {
+                const selectedCompany = companies.find(c => c.id === data.company_id);
+                const isFamily = selectedCompany?.context_type === 'family' || selectedCompany?.company_type === 'Financeiro Pessoal';
+                if (isFamily) {
+                  return data.type === 'income' 
+                    ? "Ex: Salário Daniel, Salário Adrieli, Entrada Extra..." 
+                    : "Ex: Conta de Luz, Mercado do Mês, Parcela do Carro...";
+                }
+                return data.type === 'income'
+                  ? "Ex: Consultoria Mensal, Venda de Produto..."
+                  : "Ex: Campanha Ads, Ferramentas, Impostos...";
+              })()}
             />
           </div>
 
@@ -152,37 +163,34 @@ export const QuickTransactionModal = ({ isOpen, onClose, companies, products, on
                 onChange={e => setData({...data, category: e.target.value})}
                 className="input-premium h-12 bg-zinc-50/50"
               >
-                {/* Categorias Dinâmicas baseadas no tipo da empresa */}
+                <option value="">Selecionar Categoria</option>
                 {(() => {
                   const selectedCompany = companies.find(c => c.id === data.company_id);
-                  if (selectedCompany?.company_type === 'Financeiro Pessoal') {
-                    return (
-                      <>
-                        <option value="Alimentação">Alimentação</option>
-                        <option value="Mercado">Mercado</option>
-                        <option value="Moradia">Moradia</option>
-                        <option value="Transporte">Transporte</option>
-                        <option value="Lazer">Lazer</option>
-                        <option value="Saúde">Saúde</option>
-                        <option value="Educação">Educação</option>
-                        <option value="Investimentos">Investimentos</option>
-                        <option value="Outros">Outros</option>
-                      </>
-                    );
-                  } else {
-                    return (
-                      <>
-                        <option value="Serviços / Vendas">Serviços / Vendas</option>
-                        <option value="Consultoria">Consultoria</option>
-                        <option value="Assinaturas / SaaS">Assinaturas / SaaS</option>
-                        <option value="Impostos">Impostos</option>
-                        <option value="Marketing / Ads">Marketing / Ads</option>
-                        <option value="Pró-labore">Pró-labore</option>
-                        <option value="Infraestrutura">Infraestrutura</option>
-                        <option value="Outros">Outros</option>
-                      </>
-                    );
-                  }
+                  const isFamily = selectedCompany?.context_type === 'family' || selectedCompany?.company_type === 'Financeiro Pessoal';
+
+                  const familyCategories = {
+                    income: ['Salário', 'Entrada Extra', 'Reserva', 'Outros'],
+                    expense: [
+                      'Moradia', 'Mercado', 'Transporte', 'Saúde', 'Educação', 
+                      'Cartão', 'Financiamento', 'Assinaturas', 'Filhos', 
+                      'Lazer', 'Contas da Casa', 'Outros'
+                    ]
+                  };
+
+                  const businessCategories = {
+                    income: ['Venda de Produto', 'Prestação de Serviço', 'Recorrência', 'Projeto Extra', 'Outros'],
+                    expense: [
+                      'Impostos', 'Marketing', 'Operacional', 'Ferramentas/Software', 
+                      'Equipe/Colaboradores', 'Infraestrutura', 'Investimento', 'Outros'
+                    ]
+                  };
+
+                  const categories = isFamily ? familyCategories : businessCategories;
+                  const currentOptions = data.type === 'income' ? categories.income : categories.expense;
+                  
+                  return currentOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ));
                 })()}
               </select>
             </div>

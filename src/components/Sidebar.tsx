@@ -42,6 +42,12 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: SidebarItemProps) =
 );
 
 export const Sidebar = ({ currentView, onNavigate }: { currentView: string, onNavigate: (view: string) => void }) => {
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Erro ao sair:", error);
+    window.location.reload(); // Recarregar para limpar estados
+  };
+
   return (
     <aside className="hidden lg:flex w-60 bg-surface border-r border-zinc-200/80 h-screen flex-col fixed left-0 top-0 z-50">
       {/* Branding Vency - Minimalist */}
@@ -82,11 +88,14 @@ export const Sidebar = ({ currentView, onNavigate }: { currentView: string, onNa
             DB
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-[13px] tracking-tight text-zinc-900 leading-none mb-1">Daniel Barbosa</span>
-            <span className="text-[11px] text-zinc-500 font-medium tracking-tight">Plano Gratuito</span>
+            <span className="font-semibold text-[13px] tracking-tight text-zinc-900 leading-none mb-1">Usuário Real</span>
+            <span className="text-[11px] text-zinc-500 font-medium tracking-tight">Vency Premium</span>
           </div>
         </div>
-        <button className="w-full flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-md transition-all font-medium text-[13px] tracking-tight group">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-md transition-all font-medium text-[13px] tracking-tight group"
+        >
           <LogOut size={16} className="group-hover:text-zinc-900" />
           Encerrar Sessão
         </button>

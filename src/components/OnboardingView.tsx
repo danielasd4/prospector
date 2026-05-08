@@ -62,33 +62,41 @@ export const OnboardingView = ({ onComplete, onUpdateUserProfile }: OnboardingPr
       };
       
       const primaryType = typeMap[selectedId] || 'Prestação de Serviço';
-      const companyName = data.name ? `Operações de ${data.name.split(' ')[0]}` : (selectedId === 'financeiro_pessoal' ? 'Finanças Família' : 'Minha Operação');
+      const isFamilyContext = selectedId === 'financeiro_pessoal';
+      const companyName = data.name ? `Operações de ${data.name.split(' ')[0]}` : (isFamilyContext ? 'Finanças Família' : 'Minha Operação');
       
       const { error: compErr } = await supabase.from('companies').insert({
         user_id: userId,
         name: companyName,
         company_type: primaryType,
-        revenue_type: selectedId === 'financeiro_pessoal' ? 'N/A' : (data.hasRecurring ? 'Mista' : 'Variável'),
-        predictability: selectedId === 'financeiro_pessoal' ? 'Fixa' : (data.hasRecurring ? 'Média' : 'Baixa'),
+        context_type: isFamilyContext ? 'family' : 'business',
+        revenue_type: isFamilyContext ? 'N/A' : (data.hasRecurring ? 'Mista' : 'Variável'),
+        predictability: isFamilyContext ? 'Fixa' : (data.hasRecurring ? 'Média' : 'Baixa'),
         status: 'Ativa'
       });
 
       if (compErr) console.error("Erro ao criar empresa no onboarding:", compErr);
 
       // 2. Salvar parâmetros estratégicos base no Banco de Dados
-      await onUpdateUserProfile({
-        total_cash: 0,
-        total_fixed_costs: Number(data.fixedCosts) || 0,
-        min_hourly_rate: 100,
-        has_completed_onboarding: true
-      });
-
-      setLoading(false);
-      onComplete();
-    } catch (e) {
+      try {
+        await onUpdateUserProfile({
+          total_cash: 0,
+          total_fixed_costs: Number(data.fixedCosts) || 0,
+          min_hourly_rate: 100,
+          has_completed_onboarding: true
+        });
+        
+        setLoading(false);
+        onComplete();
+      } catch (profileErr) {
+        console.error("Falha crítica ao salvar perfil:", profileErr);
+        alert("Erro ao salvar suas configurações. Verifique sua conexão e tente novamente.");
+        setLoading(false);
+      }
+    } catch (e: any) {
       console.error("Erro geral no onboarding:", e);
+      alert("Erro ao processar onboarding: " + (e.message || "Erro desconhecido"));
       setLoading(false);
-      onComplete();
     }
   };
 
