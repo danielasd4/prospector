@@ -178,6 +178,7 @@ export function useDashboardData(session: any) {
   // --- ACTIONS ---
   const updateUserProfile = async (data: Partial<UserProfile>) => {
     if (!session?.user?.id) return;
+    if (session.user.id === 'demo-user-id') return; // Simulate success in demo mode
     const { error } = await supabase
       .from('user_profile_settings')
       .upsert({ ...data, user_id: session.user.id })
@@ -188,6 +189,7 @@ export function useDashboardData(session: any) {
 
   const addTransaction = async (data: Partial<Transaction>) => {
     if (!session?.user?.id) return;
+    if (session.user.id === 'demo-user-id') return; // Demo Mode
     const { error } = await supabase.from('transactions').insert({ ...data, user_id: session.user.id });
     if (error) throw error;
     await fetchData();
@@ -195,78 +197,91 @@ export function useDashboardData(session: any) {
 
   const updateTransaction = async (id: string, data: Partial<Transaction>) => {
     if (!session?.user?.id) return;
+    if (session.user.id === 'demo-user-id') return; // Demo Mode
     const { error } = await supabase.from('transactions').update(data).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const deleteTransaction = async (id: string) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('transactions').update({ is_archived: true, archived_at: new Date().toISOString() }).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const updateCollaborator = async (id: string, data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('collaborators').update(data).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const addCollaborator = async (data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('collaborators').insert({ ...data, user_id: session.user.id });
     if (error) throw error;
     await fetchData();
   };
 
   const deleteCollaborator = async (id: string) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('collaborators').delete().eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const updateCompany = async (id: string, data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('companies').update(data).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const deleteCompany = async (id: string) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const addRecurringBill = async (data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('recurring_bills').insert({ ...data, user_id: session.user.id });
     if (error) throw error;
     await fetchData();
   };
 
   const updateRecurringBill = async (id: string, data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('recurring_bills').update(data).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const deleteRecurringBill = async (id: string) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('recurring_bills').delete().eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const addProduct = async (data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('products').insert({ ...data, user_id: session.user.id });
     if (error) throw error;
     await fetchData();
   };
 
   const updateProduct = async (id: string, data: any) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('products').update(data).eq('id', id);
     if (error) throw error;
     await fetchData();
   };
 
   const deleteProduct = async (id: string) => {
+    if (session?.user?.id === 'demo-user-id') return;
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) throw error;
     await fetchData();

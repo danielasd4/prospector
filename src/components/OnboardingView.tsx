@@ -40,10 +40,11 @@ export const OnboardingView = ({ onComplete, onUpdateUserProfile }: OnboardingPr
   const handleFinish = async () => {
     setLoading(true);
     try {
-      const userRes = await supabase.auth.getUser();
-      const userId = userRes.data.user?.id;
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || 'demo-user-id';
 
-      if (!userId) {
+      // No modo demo, apenas finalizamos sem tentar gravar no banco real
+      if (userId === 'demo-user-id') {
         setLoading(false);
         onComplete();
         return;
@@ -53,16 +54,16 @@ export const OnboardingView = ({ onComplete, onUpdateUserProfile }: OnboardingPr
       const primaryType = data.operationTypes[0] || 'servico';
       const companyName = data.name ? `Operações de ${data.name.split(' ')[0]}` : 'Minha Operação';
       
-      const { data: newComp, error: compErr } = await supabase.from('companies').insert({
+      const { error: compErr } = await supabase.from('companies').insert({
         user_id: userId,
         name: companyName,
         company_type: primaryType,
         revenue_type: data.hasRecurring ? 'Mista' : 'Variável',
         predictability: data.hasRecurring ? 'Média' : 'Baixa',
         status: 'active'
-      }).select().single();
+      });
 
-      if (compErr) throw compErr;
+      if (compErr) console.error("Erro ao criar empresa no onboarding:", compErr);
 
       // 2. Salvar parâmetros estratégicos base no Banco de Dados
       await onUpdateUserProfile({
@@ -75,7 +76,7 @@ export const OnboardingView = ({ onComplete, onUpdateUserProfile }: OnboardingPr
       setLoading(false);
       onComplete();
     } catch (e) {
-      console.error(e);
+      console.error("Erro geral no onboarding:", e);
       setLoading(false);
       onComplete();
     }

@@ -74,6 +74,16 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 
 function App() {
   const [session, setSession] = useState<any>(null);
+  const [isDemoMode, setIsDemoMode] = useState(true);
+
+  // Criar uma sessão simulada se estiver em modo Demo
+  const effectiveSession = session || (isDemoMode ? { 
+    user: { 
+      id: 'demo-user-id', 
+      email: 'demo@vencyhub.com',
+      user_metadata: { full_name: 'Usuário Demo' }
+    } 
+  } : null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
@@ -143,7 +153,7 @@ function App() {
     deleteProduct,
     refresh,
     metrics 
-  } = useDashboardData(session);
+  } = useDashboardData(effectiveSession);
 
   const logActivity = (action: string, details: string, type?: string, icon?: any) => {
     console.log(`[Activity] ${action}: ${details} (${type})`);
